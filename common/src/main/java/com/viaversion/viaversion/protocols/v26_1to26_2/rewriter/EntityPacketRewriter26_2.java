@@ -26,6 +26,7 @@ import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.protocols.v1_21_11to26_1.packet.ClientboundPacket26_1;
 import com.viaversion.viaversion.protocols.v1_21_11to26_1.packet.ClientboundPackets26_1;
 import com.viaversion.viaversion.protocols.v1_21_11to26_1.packet.ServerboundPackets26_1;
+import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.storage.XintingleiLegacyEntityStorage;
 import com.viaversion.viaversion.protocols.v26_1to26_2.Protocol26_1To26_2;
 import com.viaversion.viaversion.protocols.v26_1to26_2.storage.ProtocolStorables26_2;
 import com.viaversion.viaversion.rewriter.EntityRewriter;
@@ -54,6 +55,11 @@ public final class EntityPacketRewriter26_2 extends EntityRewriter<ClientboundPa
         });
 
         protocol.appendClientbound(ClientboundPackets26_1.LOGIN, wrapper -> {
+            final XintingleiLegacyEntityStorage legacyEntities = wrapper.user().get(XintingleiLegacyEntityStorage.class);
+            if (legacyEntities != null) {
+                legacyEntities.clear();
+            }
+
             final ProtocolStorables26_2 storables = wrapper.user().storables(protocol);
             storables.setFakeEntityId(ThreadLocalRandom.current().nextInt(Integer.MIN_VALUE, -1));
             final int entityId = wrapper.get(Types.INT, 0);
@@ -73,6 +79,13 @@ public final class EntityPacketRewriter26_2 extends EntityRewriter<ClientboundPa
         // since the client no longer accepts zero as a valid entity ID.
         final PacketHandler setFakeEntityId = wrapper -> wrapper.set(Types.VAR_INT, 0, toFakeEntityId(wrapper, wrapper.get(Types.VAR_INT, 0)));
         protocol.appendClientbound(ClientboundPackets26_1.ADD_ENTITY, wrapper -> {
+            final int originalEntityId = wrapper.get(Types.VAR_INT, 0);
+            final XintingleiLegacyEntityStorage legacyEntities = wrapper.user().get(XintingleiLegacyEntityStorage.class);
+            if (legacyEntities != null && legacyEntities.isHappyGhast(originalEntityId)) {
+                wrapper.set(Types.VAR_INT, 1, EntityTypes26_2.HAPPY_GHAST.getId());
+                tracker(wrapper.user()).addEntity(originalEntityId, EntityTypes26_2.HAPPY_GHAST);
+            }
+
             setFakeEntityId.handle(wrapper);
             final EntityType entityType = typeFromId(wrapper.get(Types.VAR_INT, 1));
             if (entityType != null && entityType.isOrHasParent(EntityTypes26_2.PROJECTILE)) {

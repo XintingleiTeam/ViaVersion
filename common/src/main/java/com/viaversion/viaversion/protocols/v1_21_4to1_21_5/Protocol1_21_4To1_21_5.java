@@ -51,6 +51,7 @@ import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.rewriter.ComponentRew
 import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.rewriter.EntityPacketRewriter1_21_5;
 import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.storage.ItemHashStorage1_21_5;
 import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.storage.MessageIndexStorage;
+import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.storage.XintingleiLegacyEntityStorage;
 import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ClientboundPacket1_21_2;
 import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ClientboundPackets1_21_2;
 import com.viaversion.viaversion.rewriter.BlockRewriter;
@@ -199,6 +200,7 @@ public final class Protocol1_21_4To1_21_5 extends AbstractProtocol<ClientboundPa
         addEntityTracker(connection, new EntityTrackerBase(connection, EntityTypes1_21_4.PLAYER));
         connection.storables(this).setItemHasher(new ItemHashStorage1_21_5(this, connection));
         connection.put(new MessageIndexStorage());
+        connection.put(new XintingleiLegacyEntityStorage());
     }
 
     @Override

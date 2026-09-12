@@ -32,6 +32,7 @@ import com.viaversion.viaversion.protocols.v1_20_5to1_21.packet.ClientboundConfi
 import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.Protocol1_21_4To1_21_5;
 import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.packet.ClientboundPackets1_21_5;
 import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.storage.MessageIndexStorage;
+import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.storage.XintingleiLegacyEntityStorage;
 import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ClientboundPacket1_21_2;
 import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ClientboundPackets1_21_2;
 import com.viaversion.viaversion.rewriter.EntityRewriter;
@@ -52,6 +53,35 @@ public final class EntityPacketRewriter1_21_5 extends EntityRewriter<Clientbound
 
     @Override
     public void registerPackets() {
+        protocol.appendClientbound(ClientboundPackets1_21_2.ADD_ENTITY, wrapper -> {
+            final int configuredTypeId = XintingleiLegacyEntityStorage.configuredEntityTypeId();
+            if (configuredTypeId < 0 || wrapper.get(Types.VAR_INT, 1) != configuredTypeId) {
+                return;
+            }
+
+            // A configured ID inside the vanilla mapping range is unsafe: it could rewrite a
+            // legitimate vanilla entity. The fixed legacy entity must be appended by Fabric.
+            if (!XintingleiLegacyEntityStorage.isConfiguredTypeIdSafe(configuredTypeId,
+                protocol.getMappingData().getEntityMappings().size())) {
+                return;
+            }
+
+            final int entityId = wrapper.get(Types.VAR_INT, 0);
+            wrapper.user().get(XintingleiLegacyEntityStorage.class).addHappyGhast(entityId);
+
+            // 1.21.5 does not yet have Happy Ghast. Ghast is a living flying carrier that survives
+            // every intermediate mapping; the final 26.2 rewriter restores the real target type.
+            wrapper.set(Types.VAR_INT, 1, EntityTypes1_21_5.GHAST.getId());
+            tracker(wrapper.user()).addEntity(entityId, EntityTypes1_21_5.GHAST);
+        });
+
+        protocol.appendClientbound(ClientboundPackets1_21_2.REMOVE_ENTITIES, wrapper -> {
+            final XintingleiLegacyEntityStorage storage = wrapper.user().get(XintingleiLegacyEntityStorage.class);
+            for (final int entityId : wrapper.get(Types.VAR_INT_ARRAY_PRIMITIVE, 0)) {
+                storage.remove(entityId);
+            }
+        });
+
         // No more special experience orb add packet
         protocol.registerClientbound(ClientboundPackets1_21_2.ADD_EXPERIENCE_ORB, ClientboundPackets1_21_5.ADD_ENTITY, wrapper -> {
             wrapper.passthrough(Types.VAR_INT); // Entity ID

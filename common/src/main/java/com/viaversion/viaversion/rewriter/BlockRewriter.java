@@ -38,6 +38,7 @@ import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.util.MathUtil;
+import com.viaversion.viaversion.util.XintingleiLegacyItemIds;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
@@ -117,7 +118,7 @@ public class BlockRewriter<C extends ClientboundPacketType> {
             wrapper.passthrough(positionType);
 
             final int blockId = wrapper.read(Types.VAR_INT);
-            wrapper.write(Types.VAR_INT, protocol.getMappingData().getNewBlockStateId(blockId));
+            wrapper.write(Types.VAR_INT, mapBlockStateId(protocol, blockId));
         });
     }
 
@@ -129,7 +130,7 @@ public class BlockRewriter<C extends ClientboundPacketType> {
             wrapper.passthrough(Types.INT); // Chunk X
             wrapper.passthrough(Types.INT); // Chunk Z
             for (BlockChangeRecord record : wrapper.passthrough(Types.BLOCK_CHANGE_ARRAY)) {
-                record.setBlockId(protocol.getMappingData().getNewBlockStateId(record.getBlockId()));
+                record.setBlockId(mapBlockStateId(protocol, record.getBlockId()));
             }
         });
     }
@@ -142,7 +143,7 @@ public class BlockRewriter<C extends ClientboundPacketType> {
             wrapper.passthrough(Types.LONG); // Chunk position
             wrapper.passthrough(Types.BOOLEAN); // Suppress light updates
             for (BlockChangeRecord record : wrapper.passthrough(Types.VAR_LONG_BLOCK_CHANGE_ARRAY)) {
-                record.setBlockId(protocol.getMappingData().getNewBlockStateId(record.getBlockId()));
+                record.setBlockId(mapBlockStateId(protocol, record.getBlockId()));
             }
         });
     }
@@ -154,7 +155,7 @@ public class BlockRewriter<C extends ClientboundPacketType> {
         protocol.registerClientbound(packetType, wrapper -> {
             wrapper.passthrough(Types.LONG); // Chunk position
             for (BlockChangeRecord record : wrapper.passthrough(Types.VAR_LONG_BLOCK_CHANGE_ARRAY)) {
-                record.setBlockId(protocol.getMappingData().getNewBlockStateId(record.getBlockId()));
+                record.setBlockId(mapBlockStateId(protocol, record.getBlockId()));
             }
         });
     }
@@ -186,7 +187,7 @@ public class BlockRewriter<C extends ClientboundPacketType> {
             if (playRecordId != -1 && id == playRecordId && mappingData.getItemMappings() != null) {
                 wrapper.write(Types.INT, mappingData.getNewItemId(data));
             } else if (id == blockBreakId && mappingData.getBlockStateMappings() != null) {
-                wrapper.write(Types.INT, mappingData.getNewBlockStateId(data));
+                wrapper.write(Types.INT, mapBlockStateId(protocol, data));
             } else {
                 wrapper.write(Types.INT, data);
             }
@@ -217,7 +218,7 @@ public class BlockRewriter<C extends ClientboundPacketType> {
             }
 
             DataPalette palette = section.palette(PaletteType.BLOCKS);
-            palette.replaceIds(protocol.getMappingData()::getNewBlockStateId);
+            palette.replaceIds(id -> mapBlockStateId(protocol, id));
         }
     }
 
@@ -281,9 +282,13 @@ public class BlockRewriter<C extends ClientboundPacketType> {
 
         for (final ChunkSection section : chunk.getSections()) {
             final DataPalette blockPalette = section.palette(PaletteType.BLOCKS);
-            blockPalette.replaceIds(protocol.getMappingData()::getNewBlockStateId);
+            blockPalette.replaceIds(id -> mapBlockStateId(protocol, id));
         }
         return chunk;
+    }
+
+    private static int mapBlockStateId(final Protocol<?, ?, ?, ?> protocol, final int id) {
+        return XintingleiLegacyItemIds.isLegacyBlockState(id) ? id : protocol.getMappingData().getNewBlockStateId(id);
     }
 
     protected Type<Chunk> createChunkType(ChunkTypeSupplier supplier, EntityTracker tracker, boolean mapped) {
