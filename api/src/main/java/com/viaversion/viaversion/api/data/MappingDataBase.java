@@ -28,6 +28,7 @@ import com.viaversion.nbt.tag.ListTag;
 import com.viaversion.nbt.tag.StringTag;
 import com.viaversion.nbt.tag.Tag;
 import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.util.XintingleiLegacyItemIds;
 import com.viaversion.viaversion.api.data.MappingDataLoader.IdentifiersPair;
 import com.viaversion.viaversion.api.minecraft.RegistryType;
 import com.viaversion.viaversion.api.minecraft.TagData;
@@ -207,26 +208,36 @@ public class MappingDataBase implements MappingData {
 
     @Override
     public int getNewBlockStateId(final int id) {
+        final int custom = XintingleiLegacyItemIds.clientBlockState(unmappedVersion, id);
+        if (custom != -1) return custom;
         return checkValidity(id, blockStateMappings.getNewId(id), "blockstate");
     }
 
     @Override
     public int getNewBlockId(final int id) {
+        final int custom = XintingleiLegacyItemIds.clientBlock(unmappedVersion, id);
+        if (custom != -1) return custom;
         return checkValidity(id, blockMappings.getNewId(id), "block");
     }
 
     @Override
     public int getOldBlockId(final int id) {
+        final int custom = XintingleiLegacyItemIds.serverBlock(unmappedVersion, id);
+        if (custom != -1) return custom;
         return blockMappings.inverse().getNewIdOrDefault(id, 1);
     }
 
     @Override
     public int getNewItemId(final int id) {
+        final int custom = XintingleiLegacyItemIds.clientItem(unmappedVersion, id);
+        if (custom != -1) return custom;
         return checkValidity(id, itemMappings.getNewId(id), "item");
     }
 
     @Override
     public int getOldItemId(final int id) {
+        final int custom = XintingleiLegacyItemIds.serverItem(unmappedVersion, id);
+        if (custom != -1) return custom;
         return itemMappings.inverse().getNewIdOrDefault(id, 1);
     }
 

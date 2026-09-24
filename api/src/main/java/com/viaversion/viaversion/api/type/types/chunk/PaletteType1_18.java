@@ -52,14 +52,17 @@ public class PaletteType1_18 extends PaletteTypeBase {
             return palette;
         }
 
-        if (bitsPerValue < 0 || bitsPerValue > type.highestBitsPerValue()) {
+        if (type == PaletteType.BLOCKS && bitsPerValue > type.highestBitsPerValue() && bitsPerValue <= 31) {
+            // Fabric/transport registries can need more bits than the vanilla registry.
+            // Honor the actual direct-palette width carried on the wire.
+        } else if (bitsPerValue < 0 || bitsPerValue > type.highestBitsPerValue()) {
             bitsPerValue = globalPaletteBits;
         } else if (type == PaletteType.BLOCKS && bitsPerValue < 4) {
             bitsPerValue = 4; // Linear block palette values are always 4 bits
         }
 
         // Read palette
-        if (bitsPerValue != globalPaletteBits) {
+        if (!isGlobal(bitsPerValue)) {
             final int paletteLength = Types.VAR_INT.readPrimitive(buffer);
             palette = new DataPaletteImpl(type.size(), paletteLength);
             for (int i = 0; i < paletteLength; i++) {
@@ -83,7 +86,7 @@ public class PaletteType1_18 extends PaletteTypeBase {
         final int valuesPerLong = (char) (64 / bitsPerValue);
         final int expectedLength = (type.size() + valuesPerLong - 1) / valuesPerLong;
         if (values.length == expectedLength) {
-            if (bitsPerValue == globalPaletteBits) {
+            if (isGlobal(bitsPerValue)) {
                 CompactArrayUtil.iterateCompactArrayWithPadding(bitsPerValue, type.size(), values, palette::setIdAt);
             } else {
                 palette.setPaletteIndexes(values, bitsPerValue, valuesPerLong);
@@ -102,10 +105,10 @@ public class PaletteType1_18 extends PaletteTypeBase {
             return;
         }
 
-        final int bitsPerValue = bitsPerValue(size);
+        final int bitsPerValue = bitsPerValue(palette);
         buffer.writeByte(bitsPerValue);
 
-        if (bitsPerValue != globalPaletteBits) {
+        if (!isGlobal(bitsPerValue)) {
             // Write palette
             Types.VAR_INT.writePrimitive(buffer, size);
             for (int i = 0; i < size; i++) {
@@ -123,16 +126,25 @@ public class PaletteType1_18 extends PaletteTypeBase {
             return;
         }
 
-        final long[] values = palette.createPackedValues(bitsPerValue, type.size(), bitsPerValue == globalPaletteBits);
+        final long[] values = palette.createPackedValues(bitsPerValue, type.size(), isGlobal(bitsPerValue));
         Types.LONG_ARRAY_PRIMITIVE.write(buffer, values);
     }
 
-    private int bitsPerValue(final int size) {
+    protected boolean isGlobal(final int bits) {
+        return bits > type.highestBitsPerValue();
+    }
+
+    private int bitsPerValue(final DataPalette palette) {
         // 1, 2, and 3 bit linear block palettes can't be read by the client
         final int min = type == PaletteType.BLOCKS ? 4 : 1;
-        int bitsPerValue = Math.max(min, MathUtil.ceilLog2(size));
+        int bitsPerValue = Math.max(min, MathUtil.ceilLog2(palette.size()));
         if (bitsPerValue > type.highestBitsPerValue()) {
             bitsPerValue = globalPaletteBits;
+            if (type == PaletteType.BLOCKS) {
+                for (int i = 0; i < palette.size(); i++) {
+                    bitsPerValue = Math.max(bitsPerValue, MathUtil.ceilLog2(Math.addExact(palette.idByIndex(i), 1)));
+                }
+            }
         }
         return bitsPerValue;
     }
@@ -142,14 +154,14 @@ public class PaletteType1_18 extends PaletteTypeBase {
         // This is a bit of extra work, but worth it to avoid otherwise having to allocate and write to an extra buffer.
         // On top of saving memory, it provides small but measurable speedup compared to writing to a separate buffer and then back
         final int size = palette.size();
-        final int bitsPerValue = bitsPerValue(size);
+        final int bitsPerValue = bitsPerValue(palette);
         final int serializedValuesSize;
         int serializedTypesSize = 0;
         if (size == 1) {
             serializedTypesSize = VarIntType.varIntLength(palette.idByIndex(0));
             serializedValuesSize = serializedValuesSize(0);
         } else {
-            if (bitsPerValue != globalPaletteBits) {
+            if (!isGlobal(bitsPerValue)) {
                 serializedTypesSize = VarIntType.varIntLength(size);
                 for (int i = 0; i < size; i++) {
                     serializedTypesSize += VarIntType.varIntLength(palette.idByIndex(i));

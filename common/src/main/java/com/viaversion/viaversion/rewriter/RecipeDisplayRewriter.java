@@ -218,7 +218,7 @@ public class RecipeDisplayRewriter<C extends ClientboundPacketType> {
     protected int rewriteItemId(final int id) {
         final MappingData mappingData = protocol.getMappingData();
         if (mappingData != null && mappingData.getItemMappings() != null) {
-            return mappingData.getItemMappings().getNewIdOrDefault(id, id);
+            return mappingData.getNewItemId(id);
         }
         return id;
     }

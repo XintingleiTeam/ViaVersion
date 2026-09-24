@@ -38,7 +38,6 @@ import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.util.MathUtil;
-import com.viaversion.viaversion.util.XintingleiLegacyItemIds;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
@@ -288,7 +287,7 @@ public class BlockRewriter<C extends ClientboundPacketType> {
     }
 
     private static int mapBlockStateId(final Protocol<?, ?, ?, ?> protocol, final int id) {
-        return XintingleiLegacyItemIds.isLegacyBlockState(id) ? id : protocol.getMappingData().getNewBlockStateId(id);
+        return protocol.getMappingData().getNewBlockStateId(id);
     }
 
     protected Type<Chunk> createChunkType(ChunkTypeSupplier supplier, EntityTracker tracker, boolean mapped) {

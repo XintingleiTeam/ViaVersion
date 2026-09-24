@@ -46,7 +46,7 @@ public final class PaletteType1_21_5 extends PaletteType1_18 {
         final int expectedLength = (type.size() + valuesPerLong - 1) / valuesPerLong;
         final long[] values = LongArrayType.readFixedLength(buffer, expectedLength);
         if (values.length != 0) {
-            if (bitsPerValue == globalPaletteBits) {
+            if (isGlobal(bitsPerValue)) {
                 CompactArrayUtil.iterateCompactArrayWithPadding(bitsPerValue, type.size(), values, palette::setIdAt);
             } else {
                 palette.setPaletteIndexes(values, bitsPerValue, valuesPerLong);
@@ -60,7 +60,7 @@ public final class PaletteType1_21_5 extends PaletteType1_18 {
             return;
         }
 
-        final long[] values = palette.createPackedValues(bitsPerValue, type.size(), bitsPerValue == globalPaletteBits);
+        final long[] values = palette.createPackedValues(bitsPerValue, type.size(), isGlobal(bitsPerValue));
         LongArrayType.writeFixedLength(buffer, values);
     }
 

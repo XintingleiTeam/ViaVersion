@@ -46,7 +46,6 @@ import com.viaversion.viaversion.api.type.types.version.VersionedTypesHolder;
 import com.viaversion.viaversion.data.item.ItemHasherBase;
 import com.viaversion.viaversion.data.item.OriginalHashedItem;
 import com.viaversion.viaversion.util.Rewritable;
-import com.viaversion.viaversion.util.XintingleiLegacyItemIds;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +90,7 @@ public class StructuredItemRewriter<C extends ClientboundPacketType, S extends S
         }
 
         final MappingData mappingData = protocol.getMappingData();
-        if (mappingData != null && mappingData.getItemMappings() != null && !XintingleiLegacyItemIds.isLegacy(item.identifier())) {
+        if (mappingData != null && mappingData.getItemMappings() != null) {
             item.setIdentifier(mappingData.getNewItemId(item.identifier()));
         }
 
@@ -243,7 +242,7 @@ public class StructuredItemRewriter<C extends ClientboundPacketType, S extends S
         }
 
         final MappingData mappingData = protocol.getMappingData();
-        if (mappingData != null && mappingData.getItemMappings() != null && !XintingleiLegacyItemIds.isLegacy(item.identifier())) {
+        if (mappingData != null && mappingData.getItemMappings() != null) {
             item.setIdentifier(mappingData.getOldItemId(item.identifier()));
         }
 

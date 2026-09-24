@@ -70,7 +70,6 @@ import com.viaversion.viaversion.rewriter.StructuredItemRewriter;
 import com.viaversion.viaversion.util.Key;
 import com.viaversion.viaversion.util.Limit;
 import com.viaversion.viaversion.util.Unit;
-import com.viaversion.viaversion.util.XintingleiLegacyItemIds;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
@@ -267,7 +266,7 @@ public final class BlockItemPacketRewriter1_21_5 extends StructuredItemRewriter<
         }
 
         final MappingData mappingData = protocol.getMappingData();
-        if (mappingData != null && mappingData.getItemMappings() != null && !XintingleiLegacyItemIds.isLegacy(item.identifier())) {
+        if (mappingData != null && mappingData.getItemMappings() != null) {
             item.setIdentifier(mappingData.getNewItemId(item.identifier()));
         }
 
