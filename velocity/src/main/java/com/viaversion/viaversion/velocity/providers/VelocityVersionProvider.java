@@ -58,6 +58,17 @@ public class VelocityVersionProvider implements VersionProvider {
     private ProtocolVersion getFrontProtocol(UserConnection user) throws Exception {
         ProtocolVersion playerVersion = user.getProtocolInfo().protocolVersion();
 
+        // XTL: pre-configuration Java clients deadlock against Fabric/Polymer when the
+        // backend translator emits configuration PINGs into Velocity's legacy login
+        // queue (no JOIN_GAME until those PINGs are answered). Keep Velocity itself on
+        // the backend's modern protocol; ViaBackwards handles the old client at the
+        // front instead, where configuration PINGs can reach it before JOIN_GAME.
+        if (playerVersion.newerThanOrEqualTo(ProtocolVersion.v1_20)
+            && playerVersion.olderThan(ProtocolVersion.v1_20_2)
+            && Via.getManager().getProtocolManager().getProtocolPath(playerVersion, ProtocolVersion.v1_21_4) != null) {
+            return ProtocolVersion.v1_21_4;
+        }
+
         IntStream versions = com.velocitypowered.api.network.ProtocolVersion.SUPPORTED_VERSIONS.stream()
             .mapToInt(com.velocitypowered.api.network.ProtocolVersion::getProtocol);
 
