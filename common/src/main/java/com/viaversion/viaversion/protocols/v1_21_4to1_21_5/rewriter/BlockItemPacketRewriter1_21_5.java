@@ -40,7 +40,7 @@ import com.viaversion.viaversion.api.minecraft.item.HashedItem;
 import com.viaversion.viaversion.api.minecraft.item.Item;
 import com.viaversion.viaversion.api.minecraft.item.StructuredItem;
 import com.viaversion.viaversion.api.minecraft.item.data.AdventureModePredicate;
-import com.viaversion.viaversion.api.minecraft.item.data.ArmorTrim;
+import com.viaversion.viaversion.api.minecraft.item.data.trim.ArmorTrim1_20_5;
 import com.viaversion.viaversion.api.minecraft.item.data.AttributeModifiers1_21;
 import com.viaversion.viaversion.api.minecraft.item.data.BlockPredicate;
 import com.viaversion.viaversion.api.minecraft.item.data.BlocksAttacks;
@@ -87,7 +87,7 @@ public final class BlockItemPacketRewriter1_21_5 extends StructuredItemRewriter<
         StructuredDataKey.BANNER_PATTERNS, StructuredDataKey.BEES1_20_5, StructuredDataKey.BLOCK_ENTITY_DATA1_20_5,
         StructuredDataKey.BLOCK_STATE, StructuredDataKey.V1_21_5.bundleContents, StructuredDataKey.V1_21_5.chargedProjectiles, StructuredDataKey.V1_21_5.container,
         StructuredDataKey.CONTAINER_LOOT, StructuredDataKey.FIREWORK_EXPLOSION, StructuredDataKey.FIREWORKS, StructuredDataKey.INSTRUMENT1_21_5, StructuredDataKey.MAP_ID,
-        StructuredDataKey.PAINTING_VARIANT, StructuredDataKey.POT_DECORATIONS, StructuredDataKey.POTION_CONTENTS1_21_2, StructuredDataKey.TROPICAL_FISH_PATTERN,
+        StructuredDataKey.PAINTING_VARIANT, StructuredDataKey.POT_DECORATIONS1_20_5, StructuredDataKey.POTION_CONTENTS1_21_2, StructuredDataKey.TROPICAL_FISH_PATTERN,
         StructuredDataKey.WRITTEN_BOOK_CONTENT
     );
     public static final List<StructuredDataKey<?>> NEW_DATA_TO_REMOVE = List.of(
@@ -339,7 +339,7 @@ public final class BlockItemPacketRewriter1_21_5 extends StructuredItemRewriter<
             hiddenComponents.add(attributeModifiersData.id());
         }
 
-        final StructuredData<ArmorTrim> armorTrimData = dataContainer.getNonEmptyData(StructuredDataKey.TRIM1_21_4);
+        final StructuredData<ArmorTrim1_20_5> armorTrimData = dataContainer.getNonEmptyData(StructuredDataKey.TRIM1_21_4);
         if (armorTrimData != null && !armorTrimData.value().showInTooltip()) {
             hiddenComponents.add(armorTrimData.id());
         }
@@ -426,7 +426,7 @@ public final class BlockItemPacketRewriter1_21_5 extends StructuredItemRewriter<
         dataContainer.replace(StructuredDataKey.UNBREAKABLE1_21_5, StructuredDataKey.UNBREAKABLE1_20_5, unbreakable -> new Unbreakable(shouldShowToServer(tooltipDisplay, StructuredDataKey.UNBREAKABLE1_20_5)));
         updateShowInTooltip(dataContainer, tooltipDisplay, StructuredDataKey.DYED_COLOR1_21_5, StructuredDataKey.DYED_COLOR1_20_5, dyedColor -> new DyedColor(dyedColor.rgb(), false));
         updateShowInTooltip(dataContainer, tooltipDisplay, StructuredDataKey.ATTRIBUTE_MODIFIERS1_21_5, StructuredDataKey.ATTRIBUTE_MODIFIERS1_21, attributeModifiers -> new AttributeModifiers1_21(attributeModifiers.modifiers(), false));
-        updateShowInTooltip(dataContainer, tooltipDisplay, StructuredDataKey.TRIM1_21_5, StructuredDataKey.TRIM1_21_4, trim -> new ArmorTrim(trim.material(), trim.pattern(), false));
+        updateShowInTooltip(dataContainer, tooltipDisplay, StructuredDataKey.TRIM1_21_5, StructuredDataKey.TRIM1_21_4, trim -> new ArmorTrim1_20_5(trim.material(), trim.pattern(), false));
         updateShowInTooltip(dataContainer, tooltipDisplay, StructuredDataKey.ENCHANTMENTS1_21_5, StructuredDataKey.ENCHANTMENTS1_20_5, enchantments -> new Enchantments(enchantments.enchantments(), false));
         updateShowInTooltip(dataContainer, tooltipDisplay, StructuredDataKey.STORED_ENCHANTMENTS1_21_5, StructuredDataKey.STORED_ENCHANTMENTS1_20_5, enchantments -> new Enchantments(enchantments.enchantments(), false));
         updateShowInTooltip(dataContainer, tooltipDisplay, StructuredDataKey.V1_21_5.canPlaceOn, StructuredDataKey.CAN_PLACE_ON1_20_5, canPlaceOn -> new AdventureModePredicate(canPlaceOn.predicates(), false));

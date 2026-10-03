@@ -33,7 +33,8 @@ public final class DefaultRegistrations {
                 .to(ProtocolVersion.v1_20_5, EntityRegistrations::registerEntityPackets1_19)
                 .to(ProtocolVersion.v1_21_4, EntityRegistrations::registerEntityPackets1_20_5)
                 .to(ProtocolVersion.v1_21_9, EntityRegistrations::registerEntityPackets1_21_4)
-                .since(EntityRegistrations::registerEntityPackets1_21_9)
+                .to(ProtocolVersion.v26_3, EntityRegistrations::registerEntityPackets1_21_9)
+                .since(EntityRegistrations::registerEntityPackets26_3)
             )
 
             .ranges(ItemRegistrations::item, ProtocolVersion.v1_13, b -> b
@@ -50,7 +51,8 @@ public final class DefaultRegistrations {
             )
             .ranges(ItemRegistrations::structuredItem, ProtocolVersion.v1_21_5, b -> b
                 .to(ProtocolVersion.v1_21_6, ItemRegistrations::registerItemPackets1_21_5)
-                .since(ItemRegistrations::registerItemPackets1_21_6)
+                .to(ProtocolVersion.v26_3, ItemRegistrations::registerItemPackets1_21_6)
+                .since(ItemRegistrations::registerItemPackets26_3)
             )
 
             .ranges(BlockRegistrations::block, ProtocolVersion.v1_13, steps -> steps
@@ -71,7 +73,8 @@ public final class DefaultRegistrations {
                 .to(ProtocolVersion.v1_21_2, ParticleRegistrations::registerParticlePackets1_20_5)
                 .to(ProtocolVersion.v1_21_4, ParticleRegistrations::registerParticlePackets1_21_2)
                 .to(ProtocolVersion.v1_21_9, ParticleRegistrations::registerParticlePackets1_21_4)
-                .since(ParticleRegistrations::registerParticlePackets1_21_9)
+                .to(ProtocolVersion.v26_3, ParticleRegistrations::registerParticlePackets1_21_9)
+                .since(ParticleRegistrations::registerParticlePackets26_3)
             )
 
             .ranges(TextComponentRegistrations::text, ProtocolVersion.v1_12_2, b -> b
@@ -87,7 +90,8 @@ public final class DefaultRegistrations {
             )
             .ranges(TextComponentRegistrations::nbtText, ProtocolVersion.v1_21_5, b -> b
                 .to(ProtocolVersion.v26_2, TextComponentRegistrations::registerComponents1_21_5)
-                .since(TextComponentRegistrations::registerComponents26_2)
+                .to(ProtocolVersion.v26_3, TextComponentRegistrations::registerComponents26_2)
+                .since(TextComponentRegistrations::registerComponents26_3)
             )
 
             .ranges(ProtocolVersion.v1_17_1, sbeps -> sbeps

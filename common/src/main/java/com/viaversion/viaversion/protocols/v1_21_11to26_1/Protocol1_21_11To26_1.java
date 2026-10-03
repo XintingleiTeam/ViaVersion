@@ -144,7 +144,13 @@ public final class Protocol1_21_11To26_1 extends AbstractProtocol<ClientboundPac
             addBabyAssetId(tag);
         });
         registryDataRewriter.addHandler("dimension_type", (key, tag) -> {
-            tag.putBoolean("has_ender_dragon_fight", Key.equals(key, "the_end"));
+            final String strippedKey = Key.stripMinecraftNamespace(key);
+            tag.putBoolean("has_ender_dragon_fight", strippedKey.equals("the_end"));
+
+            switch (strippedKey) {
+                case "overworld", "overworld_caves" -> tag.putString("default_clock", "minecraft:overworld");
+                case "the_end" -> tag.putString("default_clock", "minecraft:the_end");
+            }
 
             CompoundTag attributes = tag.getCompoundTag("attributes");
             if (attributes == null) {
@@ -152,7 +158,7 @@ public final class Protocol1_21_11To26_1 extends AbstractProtocol<ClientboundPac
                 tag.put("attributes", attributes);
             }
 
-            final int ambientLightColor = switch (Key.stripMinecraftNamespace(key)) {
+            final int ambientLightColor = switch (strippedKey) {
                 case "the_end" -> -12630209;
                 case "the_nether" -> -13621215;
                 case "overworld" -> -16119286;
@@ -165,12 +171,9 @@ public final class Protocol1_21_11To26_1 extends AbstractProtocol<ClientboundPac
 
             final long dayTime = wrapper.read(Types.LONG);
             final boolean tickDayTime = wrapper.read(Types.BOOLEAN);
-
-            wrapper.write(Types.VAR_INT, 1); // One!
-            wrapper.write(Types.VAR_INT, 0); // Overworld clock
-            wrapper.write(Types.VAR_LONG, dayTime); // Total ticks
-            wrapper.write(Types.FLOAT, 0F); // Partial tick
-            wrapper.write(Types.FLOAT, tickDayTime ? 1F : 0F); // Tick rate
+            wrapper.write(Types.VAR_INT, 2);
+            writeClockUpdate(wrapper, 0, dayTime, tickDayTime); // Overworld clock
+            writeClockUpdate(wrapper, 1, dayTime, tickDayTime); // The End clock
         });
 
         replaceClientbound(ClientboundPackets1_21_11.UPDATE_TAGS, this::handleTags);
@@ -183,6 +186,13 @@ public final class Protocol1_21_11To26_1 extends AbstractProtocol<ClientboundPac
                 wrapper.cancel();
             }
         });
+    }
+
+    private void writeClockUpdate(final PacketWrapper wrapper, final int clockId, final long dayTime, final boolean tickDayTime) {
+        wrapper.write(Types.VAR_INT, clockId);
+        wrapper.write(Types.VAR_LONG, dayTime); // Total ticks
+        wrapper.write(Types.FLOAT, 0F); // Partial tick
+        wrapper.write(Types.FLOAT, tickDayTime ? 1F : 0F); // Tick rate
     }
 
     private void handleTags(final PacketWrapper wrapper) {
@@ -323,12 +333,12 @@ public final class Protocol1_21_11To26_1 extends AbstractProtocol<ClientboundPac
             StructuredDataKey.BUCKET_ENTITY_DATA, StructuredDataKey.BLOCK_ENTITY_DATA1_21_9, StructuredDataKey.INSTRUMENT26_1,
             StructuredDataKey.RECIPES, StructuredDataKey.LODESTONE_TRACKER, StructuredDataKey.FIREWORK_EXPLOSION, StructuredDataKey.FIREWORKS,
             StructuredDataKey.PROFILE1_21_9, StructuredDataKey.NOTE_BLOCK_SOUND, StructuredDataKey.BANNER_PATTERNS, StructuredDataKey.BASE_COLOR,
-            StructuredDataKey.POT_DECORATIONS, StructuredDataKey.BLOCK_STATE, StructuredDataKey.BEES1_21_9, StructuredDataKey.LOCK1_21_2,
+            StructuredDataKey.POT_DECORATIONS1_20_5, StructuredDataKey.BLOCK_STATE, StructuredDataKey.BEES1_21_9, StructuredDataKey.LOCK1_21_2,
             StructuredDataKey.CONTAINER_LOOT, StructuredDataKey.TOOL1_21_5, StructuredDataKey.ITEM_NAME, StructuredDataKey.OMINOUS_BOTTLE_AMPLIFIER,
             StructuredDataKey.FOOD1_21_2, StructuredDataKey.JUKEBOX_PLAYABLE26_1, StructuredDataKey.ATTRIBUTE_MODIFIERS1_21_6,
             StructuredDataKey.REPAIRABLE, StructuredDataKey.ENCHANTABLE, StructuredDataKey.CONSUMABLE1_21_2, StructuredDataKey.ATTACK_RANGE,
             StructuredDataKey.USE_COOLDOWN, StructuredDataKey.DAMAGE, StructuredDataKey.EQUIPPABLE1_21_6, StructuredDataKey.ITEM_MODEL,
-            StructuredDataKey.GLIDER, StructuredDataKey.TOOLTIP_STYLE, StructuredDataKey.DEATH_PROTECTION, StructuredDataKey.WEAPON,
+            StructuredDataKey.GLIDER, StructuredDataKey.TOOLTIP_STYLE, StructuredDataKey.DEATH_PROTECTION1_21_2, StructuredDataKey.WEAPON,
             StructuredDataKey.POTION_DURATION_SCALE, StructuredDataKey.VILLAGER_VARIANT, StructuredDataKey.WOLF_VARIANT, StructuredDataKey.WOLF_COLLAR,
             StructuredDataKey.FOX_VARIANT, StructuredDataKey.SALMON_SIZE, StructuredDataKey.PARROT_VARIANT, StructuredDataKey.TROPICAL_FISH_PATTERN,
             StructuredDataKey.TROPICAL_FISH_BASE_COLOR, StructuredDataKey.TROPICAL_FISH_PATTERN_COLOR, StructuredDataKey.MOOSHROOM_VARIANT,

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class XintingleiTransportTest {
-    static final String[] VERSIONS = {"1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.9", "1.21.11", "26.1", "26.2"};
+    static final String[] VERSIONS = {"1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.9", "1.21.11", "26.1", "26.2", "26.3"};
     static final List<Probe> CHAIN = new ArrayList<>();
 
     @BeforeAll
@@ -56,7 +56,8 @@ class XintingleiTransportTest {
         }
         int template = 1322;
         for (Probe step : CHAIN) template = step.getNewItemId(template);
-        assertEquals(1458, template);
+        var latest = loader.identifiersFromGlobalIds(loader.loadNBT("identifiers-26.3.nbt"), "items");
+        assertEquals(initial.get(1322), latest.get(template), "Smithing template must not collide with legacy mod items");
     }
 
     @Test

@@ -42,7 +42,7 @@ public enum ServerboundPackets26_1 implements ServerboundPacket26_1 {
     CONTAINER_SLOT_STATE_CHANGED, // 0x14
     COOKIE_RESPONSE, // 0x15
     CUSTOM_PAYLOAD, // 0x16
-    DEBUG_SAMPLE_SUBSCRIPTION, // 0x17
+    DEBUG_SUBSCRIPTION_REQUEST, // 0x17
     EDIT_BOOK, // 0x18
     ENTITY_TAG_QUERY, // 0x19
     INTERACT, // 0x1A
@@ -81,7 +81,7 @@ public enum ServerboundPackets26_1 implements ServerboundPacket26_1 {
     SET_STRUCTURE_BLOCK, // 0x3B
     SET_TEST_BLOCK, // 0x3C
     SIGN_UPDATE, // 0x3D
-    SPECTATE_ENTITY, // 0x3E // TODO rename to SPECTATOR_ACTION once a new enum is needed
+    SPECTATE_ENTITY, // 0x3E
     SWING, // 0x3F
     TELEPORT_TO_ENTITY, // 0x40
     TEST_INSTANCE_BLOCK_ACTION, // 0x41
